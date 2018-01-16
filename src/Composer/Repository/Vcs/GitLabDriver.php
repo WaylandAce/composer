@@ -262,7 +262,7 @@ class GitLabDriver extends VcsDriver
         $domainName = $this->originUrl;
         $portNumber = (true === is_numeric($this->portNumber)) ? sprintf(':%s', $this->portNumber) : '';
 
-        return $this->scheme.'://'.$domainName.$portNumber.'/api/v4/projects/'.$this->urlEncodeAll($this->namespace).'%2F'.$this->urlEncodeAll($this->repository);
+        return $this->scheme.'://'.$domainName.$portNumber.'/api/v3/projects/'.$this->urlEncodeAll($this->namespace).'%2F'.$this->urlEncodeAll($this->repository);
     }
 
     /**

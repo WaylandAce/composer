@@ -257,7 +257,8 @@ class RemoteFilesystem
         }
 
         if (isset($options['gitlab-token'])) {
-            $fileUrl .= (false === strpos($fileUrl, '?') ? '?' : '&') . 'access_token='.$options['gitlab-token'];
+//            $fileUrl .= (false === strpos($fileUrl, '?') ? '?' : '&') . 'access_token='.$options['gitlab-token'];
+            $fileUrl .= (false === strpos($fileUrl, '?') ? '?' : '&') . 'private_token='.$options['gitlab-token'];
             unset($options['gitlab-token']);
         }
 

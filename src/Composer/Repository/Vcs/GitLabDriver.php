@@ -371,14 +371,20 @@ class GitLabDriver extends VcsDriver
      */
     protected function generateSshUrl()
     {
-        return 'git@' . $this->originUrl . ':'.$this->namespace.'/'.$this->repository.'.git';
+        return 'git@' . $this->originUrl . ':' . $this->portNumber. '/'.$this->namespace.'/'.$this->repository.'.git';
     }
 
+    /**
+     * @return string
+     */
     protected function generatePublicUrl()
     {
         return 'https://' . $this->originUrl . '/'.$this->namespace.'/'.$this->repository.'.git';
     }
 
+    /**
+     * @param $url
+     */
     protected function setupGitDriver($url)
     {
         $this->gitDriver = new GitDriver(

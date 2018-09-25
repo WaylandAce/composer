@@ -71,7 +71,7 @@ class GitLabDriver extends VcsDriver
      */
     protected $portNumber;
 
-    const URL_REGEX = '#^(?:(?P<scheme>https?)://(?P<domain>.+?)/|git@(?P<domain2>[^:]+):)(?P<parts>.+)/(?P<repo>[^/]+?)(?:\.git|/)?$#';
+    const URL_REGEX = '#^(?:(?P<scheme>https?)://(?P<domain>.+?)(?::(?P<port>[0-9]+))?/|git@(?P<domain2>[^:]+):)(?P<parts>.+)/(?P<repo>[^/]+?)(?:\.git|/)?$#';
 
     /**
      * Extracts information from the repository url.
@@ -121,9 +121,7 @@ class GitLabDriver extends VcsDriver
     }
 
     /**
-     * @param string $file
-     * @param string $identifier
-     * @return bool|mixed|null|string|void
+     * {@inheritdoc}
      */
     public function getFileContent($file, $identifier)
     {
@@ -139,14 +137,10 @@ class GitLabDriver extends VcsDriver
             }
         }
 
-//        $resource = $this->getApiUrl().'/repository/files/'.$this->urlEncodeAll($file).'/raw?ref='.$identifier;
-        $resource = $this->getApiUrl().'/repository/files/?file_path='.$this->urlEncodeAll($file).'&ref='.$identifier . '&raw=1';
+        $resource = $this->getApiUrl().'/repository/files/'.$this->urlEncodeAll($file).'/raw?ref='.$identifier;
+
         try {
             $content = $this->getContents($resource);
-
-            // if v3
-            $json = json_decode($content, true);
-            $content = base64_decode($json['content']);
         } catch (TransportException $e) {
             if ($e->getCode() !== 404) {
                 throw $e;
@@ -328,17 +322,12 @@ class GitLabDriver extends VcsDriver
         // we need to fetch the default branch from the api
         $resource = $this->getApiUrl();
         $this->project = JsonFile::parseJson($this->getContents($resource, true), $resource);
-
-        $this->isPrivate = $this->isPrivate();
-    }
-
-    private function isPrivate()
-    {
         if (isset($this->project['visibility'])) {
-            return $this->project['visibility'] !== 'public';
+            $this->isPrivate = $this->project['visibility'] !== 'public';
+        } else {
+            // client is not authendicated, therefore repository has to be public
+            $this->isPrivate = false;
         }
-
-        return $this->project['visibility_level'] != 20;
     }
 
     protected function attemptCloneFallback()
@@ -379,7 +368,7 @@ class GitLabDriver extends VcsDriver
      */
     protected function generatePublicUrl()
     {
-        return 'https://' . $this->originUrl . '/'.$this->namespace.'/'.$this->repository.'.git';
+        return $this->scheme . '://' . $this->originUrl . '/'.$this->namespace.'/'.$this->repository.'.git';
     }
 
     /**
